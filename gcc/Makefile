@@ -1,5 +1,6 @@
 TARGET=h101
 EXECUTABLE=h101.elf
+OPENOCD_DIR=/usr/local/share/openocd
 
 CC=arm-none-eabi-gcc
 LD=arm-none-eabi-gcc
@@ -52,7 +53,12 @@ $(TARGET): $(EXECUTABLE)
 
 $(EXECUTABLE): $(SRC) $(STARTUP)
 	$(CC) $(CFLAGS) $^ -lm -lnosys -o $@
-	
+
+$(TARGET).flash: $(TARGET).hex
+	openocd -f $(OPENOCD_DIR)/scripts/interface/stlink-v2.cfg -f $(OPENOCD_DIR)/scripts/target/stm32f1x.cfg -c init -c "reset halt" -c "flash write_image erase $(TARGET) 0x08000000" -c "verify_image $(TARGET) 0x08000000" -c "reset run" -c shutdown
+
+unlock:
+	openocd -s $(OPENOCD_DIR)/scripts -f $(OPENOCD_DIR)/scripts/interface/stlink-v2.cfg -f $(OPENOCD_DIR)/scripts/target/stm32f1x.cfg - debug_level 3 -c init -c "reset halt" -c "mww 0x40022004 0x45670123" -c "mww 0x40022004 0xCDEF89AB" -c "mww 0x40022008 0x45670123" -c "mww 0x40022008 0xCDEF89AB" -c "mww 0x40022010 0x220" -c "mww 0x40022010 0x260" -c "sleep 100" -c "mww 0x40022010 0x230" -c "mwh 0x1ffff800 0x5AA5" -c "sleep 1000" -c "mww 0x40022010 0x2220" -c "sleep 100" -c "mdw 0x40022010" -c "mdw 0x4002201c" -c "mdw 0x1ffff800" -c shutdown
 
 clean:
 	rm -f Startup.lst $(TARGET) $(TARGET).lst $(OBJ) $(AUTOGEN) \
