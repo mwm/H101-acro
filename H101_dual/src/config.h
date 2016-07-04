@@ -120,11 +120,11 @@
 // CH_PIT_TRIM, CH_RLL_TRIM, CH_THR_TRIM, CH_YAW_TRIM
 
 // devo can use DEVO_CHAN_5 - DEVO_CHAN_10
-#define HEADLESSMODE CH_OFF
+#define HEADLESSMODE DEVO_CHAN_10
 
 // rates / expert mode
 // same settings as above (default - CH_EXPERT)
-#define RATES CH_EXPERT
+#define RATES CH_OFF
 
 
 // level / acro mode switch
