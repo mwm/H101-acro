@@ -130,12 +130,12 @@
 // level / acro mode switch
 // CH_AUX1 = gestures (default - CH_AUX1)
 // same settings as above
-#define LEVELMODE CH_AUX1
+#define LEVELMODE DEVO_CHAN_6
 
 
 // channel for inverted mode
 // same settings as above (default - off)
-#define INVERTEDMODE CH_OFF
+#define INVERTEDMODE DEVO_CHAN_9
 
 
 // aux1 channel starts on if this is defined, otherwise off.
