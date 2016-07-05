@@ -1,5 +1,5 @@
 TARGET=h101
-EXECUTABLE=h101.elf
+EXECUTABLE=$(TARGET).elf
 
 OPENOCD_DIR=/usr/local/share/openocd
 BUILD_DIR=build
@@ -49,11 +49,11 @@ VPATH = $(topdir)/H101_dual/src:$(topdir)/CMSIS:$(topdir)/Peripherals/src
 OBJS = $(addprefix $(BUILD_DIR)/,$(addsuffix .o,$(notdir $(basename $(SRC)))))
 DEPS = $(OBJS:.o=.d)
 
-all: $(TARGET)
+all: $(TARGET).hex
 
-$(EXECUTABLE): $(OBJS)
+$(TARGET).elf: $(OBJS)
 	$(CC) $(CFLAGS) $^ -lm -lnosys -o $@
-$(TARGET): $(EXECUTABLE)
+$(TARGET): $(TARGET.elf)
 	$(CP) -O binary $^ $@
 $(TARGET).hex: $(EXECUTABLE)
 	$(CP) -O ihex $^ $@
