@@ -1,6 +1,9 @@
 TARGET=h101
 EXECUTABLE=h101.elf
+
 OPENOCD_DIR=/usr/local/share/openocd
+BUILD_DIR=build
+$(shell mkdir -p $(BUILD_DIR) > /dev/null)
 
 CC=arm-none-eabi-gcc
 LD=arm-none-eabi-gcc
@@ -11,7 +14,6 @@ OD=arm-none-eabi-objdump
 
 
 DEFS = -DUSE_STDPERIPH_DRIVER
-STARTUP = startup.s
 
 MCU = cortex-m3
 MCFLAGS = -mcpu=$(MCU) -mthumb -mlittle-endian -mthumb-interwork -ffast-math -fdata-sections -ffunction-sections
@@ -24,7 +26,9 @@ INCLUDES = -I$(topdir)/H8mini-test/src/ \
 
 OPTIMIZE = -Os
 
-CFLAGS = $(MCFLAGS)  $(OPTIMIZE)  $(DEFS) -I. -I./ $(INCLUDES) -Wl,-T,flash.ld,-Map,output.map,--gc-sections -std=gnu99
+DEPFLAGS = -MT $@ -MMD -MF $(BUILD_DIR)/$*.d
+CFLAGS = $(MCFLAGS) $(DEPFLAGS) $(OPTIMIZE)  $(DEFS) $(INCLUDES) -Wl,-T,flash.ld,-Map,$(TARGET).map,--gc-sections
+CXXFLAG = $(CFLAGS) -std=gnu99
 AFLAGS = $(MCFLAGS)
 
 SRC = 	$(wildcard $(topdir)/H101_dual/src/*.c) \
@@ -38,22 +42,21 @@ SRC = 	$(wildcard $(topdir)/H101_dual/src/*.c) \
 	$(topdir)/Peripherals/src/gd32f1x0_i2c.c \
 	$(topdir)/Peripherals/src/gd32f1x0_rcc.c \
 	$(topdir)/Peripherals/src/gd32f1x0_timer.c \
-	$(topdir)/Peripherals/src/gd32f1x0_usart.c
+	$(topdir)/Peripherals/src/gd32f1x0_usart.c \
+	startup.s
+VPATH = $(topdir)/H101_dual/src:$(topdir)/CMSIS:$(topdir)/Peripherals/src
 
-OBJDIR = .
-OBJ = $(addprefix "$(OBJDIR)/",$(addsuffix .o,$(basename $(SRC))))
-OBJ += Startup.o
+OBJS = $(addprefix $(BUILD_DIR)/,$(addsuffix .o,$(notdir $(basename $(SRC)))))
+DEPS = $(OBJS:.o=.d)
 
 all: $(TARGET)
 
-$(TARGET).hex: $(EXECUTABLE)
-	$(CP) -O ihex $^ $@
+$(EXECUTABLE): $(OBJS)
+	$(CC) $(CFLAGS) $^ -lm -lnosys -o $@
 $(TARGET): $(EXECUTABLE)
 	$(CP) -O binary $^ $@
-
-$(EXECUTABLE): $(SRC) $(STARTUP)
-	$(CC) $(CFLAGS) $^ -lm -lnosys -o $@
-
+$(TARGET).hex: $(EXECUTABLE)
+	$(CP) -O ihex $^ $@
 $(TARGET).flash: $(TARGET).hex
 	openocd -f $(OPENOCD_DIR)/scripts/interface/stlink-v2.cfg -f $(OPENOCD_DIR)/scripts/target/stm32f1x.cfg -c init -c "reset halt" -c "flash write_image erase $(TARGET) 0x08000000" -c "verify_image $(TARGET) 0x08000000" -c "reset run" -c shutdown
 
@@ -61,6 +64,19 @@ unlock:
 	openocd -s $(OPENOCD_DIR)/scripts -f $(OPENOCD_DIR)/scripts/interface/stlink-v2.cfg -f $(OPENOCD_DIR)/scripts/target/stm32f1x.cfg - debug_level 3 -c init -c "reset halt" -c "mww 0x40022004 0x45670123" -c "mww 0x40022004 0xCDEF89AB" -c "mww 0x40022008 0x45670123" -c "mww 0x40022008 0xCDEF89AB" -c "mww 0x40022010 0x220" -c "mww 0x40022010 0x260" -c "sleep 100" -c "mww 0x40022010 0x230" -c "mwh 0x1ffff800 0x5AA5" -c "sleep 1000" -c "mww 0x40022010 0x2220" -c "sleep 100" -c "mdw 0x40022010" -c "mdw 0x4002201c" -c "mdw 0x1ffff800" -c shutdown
 
 clean:
-	rm -f Startup.lst $(TARGET) $(TARGET).lst $(OBJ) $(AUTOGEN) \
-		$(TARGET).out $(TARGET).hex  $(TARGET).map \
-		$(TARGET).dmp $(EXECUTABLE)
+	echo $(DEPS)
+	rm -f Startup.lst $(TARGET) $(TARGET).lst $(TARGET).out $(TARGET).hex \
+	      $(TARGET).map $(TARGET).dmp $(EXECUTABLE) $(OBJS) $(DEPS)
+	rmdir $(BUILD_DIR)
+
+$(BUILD_DIR)/%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.o: %.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.o: %.s
+	$(AS) $< -o $@
+
+$(OBJS): Makefile
+-include $(DEPS)
