@@ -49,15 +49,15 @@ VPATH = $(topdir)/H101_dual/src:$(topdir)/CMSIS:$(topdir)/Peripherals/src
 OBJS = $(addprefix $(BUILD_DIR)/,$(addsuffix .o,$(notdir $(basename $(SRC)))))
 DEPS = $(OBJS:.o=.d)
 
-all: $(TARGET).hex
+all: $(TARGET)
 
 $(TARGET).elf: $(OBJS)
 	$(CC) $(CFLAGS) $^ -lm -lnosys -o $@
-$(TARGET): $(TARGET.elf)
+$(TARGET): $(TARGET).elf
 	$(CP) -O binary $^ $@
-$(TARGET).hex: $(EXECUTABLE)
+$(TARGET).hex: $(TARGET).elf
 	$(CP) -O ihex $^ $@
-$(TARGET).flash: $(TARGET).hex
+$(TARGET).flash: $(TARGET)
 	openocd -f $(OPENOCD_DIR)/scripts/interface/stlink-v2.cfg -f $(OPENOCD_DIR)/scripts/target/stm32f1x.cfg -c init -c "reset halt" -c "flash write_image erase $(TARGET) 0x08000000" -c "verify_image $(TARGET) 0x08000000" -c "reset run" -c shutdown
 
 unlock:
