@@ -120,22 +120,20 @@
 // CH_PIT_TRIM, CH_RLL_TRIM, CH_THR_TRIM, CH_YAW_TRIM
 
 // devo can use DEVO_CHAN_5 - DEVO_CHAN_10
-#define HEADLESSMODE DEVO_CHAN_10
+#define HEADLESSMODE DEVO_CHAN_7
 
 // rates / expert mode
 // same settings as above (default - CH_EXPERT)
 #define RATES CH_ON
 
-
 // level / acro mode switch
 // CH_AUX1 = gestures (default - CH_AUX1)
 // same settings as above
-#define LEVELMODE DEVO_CHAN_6
-
+#define LEVELMODE DEVO_CHAN_5
 
 // channel for inverted mode
 // same settings as above (default - off)
-#define INVERTEDMODE DEVO_CHAN_9
+#define INVERTEDMODE DEVO_CHAN_6
 
 
 // aux1 channel starts on if this is defined, otherwise off.
@@ -261,24 +259,3 @@
 #pragma diag_error 260 
 #endif
 // --fpmode=fast ON
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
