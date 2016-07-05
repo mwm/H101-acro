@@ -124,7 +124,7 @@
 
 // rates / expert mode
 // same settings as above (default - CH_EXPERT)
-#define RATES CH_OFF
+#define RATES CH_ON
 
 
 // level / acro mode switch
