@@ -32,12 +32,13 @@ THE SOFTWARE.
 //#define SECOND_ORDER_DTERM
 #define NEW_DTERM
 
-#include <stdbool.h>
+//#include <stdbool.h>
 #include "pid.h"
 #include "util.h"
 #include "config.h"
 
 #include "defines.h"
+
 
 
 // Kp                                                                                   ROLL       PITCH     YAW
@@ -48,6 +49,7 @@ float pidki[PIDNUMBER] = { 6.5e-1, 6.5e-1, 50e-1 };
 
 // Kd                                                                                   ROLL       PITCH     YAW
 float pidkd[PIDNUMBER] = { 6.05e-1, 6.05e-1, 4e-1 };
+
 
 
 // output limit                 
@@ -167,10 +169,6 @@ float pid(int x)
 #endif
 
 	limitf(&pidoutput[x], outlimit[x]);
-
-
-
-
 
 	return pidoutput[x];
 }
