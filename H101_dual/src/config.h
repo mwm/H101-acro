@@ -38,7 +38,7 @@
 // multiplier for high rates
 // devo/module uses high rates only
 #define HIRATEMULTI 2.0f
-#define HIRATEMULTIYAW 2.0f
+#define HIRATEMULTIYAW 3.3f
 
 // max angle for level mode (in degrees)
 // low and high rates(angle?)
